@@ -31,6 +31,7 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+
 class _MyHomePageState extends State<MyHomePage> {
   // 1. Change how the _counter variable is declared so that it uses var instead of double
   var _counter = 0.0;
@@ -46,14 +47,18 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+
+
   void _incrementCounter() {
     setState(() {
-      if ( _counter < 99.0 )
-      _counter++;
-      myFontSize = _counter;
+      if ( _counter < 99.0 ) { //add missing brackets
+        _counter++;
+        myFontSize = _counter;
+      }
     });
   }
 
+  //
   @override
   Widget build(BuildContext context) {
     return Scaffold(
