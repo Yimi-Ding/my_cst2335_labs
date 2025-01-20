@@ -48,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
-
+//increment counter
   void _incrementCounter() {
     setState(() {
       if ( _counter < 99.0 ) { //add missing brackets
@@ -78,7 +78,8 @@ class _MyHomePageState extends State<MyHomePage> {
               'You have pushed the button this many times:',
               // 2. Change both the Text() widgets so that they use a TextStyle() object that are both set to that size.
               style: TextStyle(fontSize: myFontSize),
-            ),
+            ), Image.asset("images/algonquin.jpg", width: 200, height: 200),
+
             Text(
               '$_counter',
               //style: Theme.of(context).textTheme.headlineMedium,
