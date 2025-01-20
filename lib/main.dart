@@ -48,7 +48,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
-//increment counter
   void _incrementCounter() {
     setState(() {
       if ( _counter < 99.0 ) { //add missing brackets
@@ -86,6 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
               // update font size
               style: TextStyle(fontSize: myFontSize),
             ),
+            Image.asset("images/ac-logo.jpg", width: 200, height: 200), //image
             Slider(value:_counter, max:100.0, onChanged: setNewValue, min:0.0 )
           ],
 
