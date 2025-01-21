@@ -33,21 +33,21 @@ class MyHomePage extends StatefulWidget {
 
 
 class _MyHomePageState extends State<MyHomePage> {
-  // 1. Change how the _counter variable is declared so that it uses var instead of double
+
   var _counter = 0.0;
-  // 2. Declare another variable called myFontSize and have it initialized to 30.0
   var myFontSize = 30.0;
 
+  // Controllers for the text fields
+  final TextEditingController  _loginController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
 
-  // 3. Change the setNewValue() function so that it also sets your new myFontSize variable equal to the new value.
   void setNewValue(double value) {
     setState(() {
       _counter = value;
       myFontSize = value;
     });
   }
-
 
 
   void _incrementCounter() {
@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  //
+  //widgets
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,12 +76,26 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
 
-            TextField(controller: _controller,
+            // text field login
+            TextField(controller: _loginController,
             decoration: InputDecoration(
               hintText:"Login",
               border: OutlineInputBorder(),
               labelText: "Login"
-            ),)
+            ),),
+
+            // text field password
+            TextField(
+              controller: _passwordController,
+              obscureText: true, // make the password field not show what is typed
+              decoration: InputDecoration(
+                  hintText:"Password",
+                  border: OutlineInputBorder(),
+                  labelText: "Password",
+              ),)
+
+            // login button
+            ElevatedButton(onPressed: onPressed, child: child),
 
           ],
 
