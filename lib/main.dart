@@ -33,20 +33,24 @@ class MyHomePage extends StatefulWidget {
 
 
 class _MyHomePageState extends State<MyHomePage> {
-  // 1. Change how the _counter variable is declared so that it uses var instead of double
+
   var _counter = 0.0;
-  // 2. Declare another variable called myFontSize and have it initialized to 30.0
   var myFontSize = 30.0;
 
+  // Controllers for the text fields
+  final TextEditingController  _loginController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  // 3. Change the setNewValue() function so that it also sets your new myFontSize variable equal to the new value.
+  // a string variable that is initialized to the image
+  var imageSource = "images/question-mark.png";
+
+
   void setNewValue(double value) {
     setState(() {
       _counter = value;
       myFontSize = value;
     });
   }
-
 
 
   void _incrementCounter() {
@@ -58,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  //
+  //widgets
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,19 +78,48 @@ class _MyHomePageState extends State<MyHomePage> {
 
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-              // 2. Change both the Text() widgets so that they use a TextStyle() object that are both set to that size.
-              style: TextStyle(fontSize: myFontSize),
+
+            // text field login
+            TextField(
+              controller: _loginController,
+              decoration: const InputDecoration(
+              hintText:"Login",
+              border: OutlineInputBorder(),
+              labelText: "Login"
+            ),),
+
+            // text field password
+            TextField(
+              controller: _passwordController,
+              obscureText: true, // make the password field not show what is typed
+              decoration: const InputDecoration(
+                  hintText:"Password",
+                  border: OutlineInputBorder(),
+                  labelText: "Password",
+              ),),
+
+            // login button
+            ElevatedButton(
+                onPressed: (){
+                  String password = _passwordController.text; // get the string that was typed in the password field
+                  setState(() {
+                    //  If the string is "QWERTY123", then change the image source to be a light bulb
+                    if (password == "QWERTY123"){
+                      imageSource = "images/idea.png";
+                    } else { //If the string is anything other than "QWERTY123", then set the image to a stop sign
+                      imageSource = "images/stop.png";
+                    }
+                  });
+                },
+                child: const Text("Login"),
             ),
-            Text(
-              '$_counter',
-              //style: Theme.of(context).textTheme.headlineMedium,
-              // update font size
-              style: TextStyle(fontSize: myFontSize),
-            ),
-            Slider(value:_counter, max:100.0, onChanged: setNewValue, min:0.0 )
+
+            Image.asset(imageSource, width: 300, height:300),
+
+
           ],
+
+
 
         ),
       ),
