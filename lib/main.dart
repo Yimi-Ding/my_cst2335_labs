@@ -41,6 +41,9 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController  _loginController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  // a string variable that is initialized to the image
+  var imageSource = "images/question-mark.png";
+
 
   void setNewValue(double value) {
     setState(() {
@@ -99,13 +102,24 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
                 onPressed: (){
                   String password = _passwordController.text; // get the string that was typed in the password field
+                  setState(() {
+                    //  If the string is "QWERTY123", then change the image source to be a light bulb
+                    if (password == "QWERTY123"){
+                      imageSource = "images/idea.png";
+                    } else { //If the string is anything other than "QWERTY123", then set the image to a stop sign
+                      imageSource = "images/stop.png";
+                    }
+                  });
                 },
                 child: const Text("Login"),
             ),
 
+            Image.asset(imageSource, width: 300, height:300),
+
+
           ],
 
-          // question mark image
+
 
         ),
       ),
