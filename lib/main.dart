@@ -77,8 +77,9 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
 
             // text field login
-            TextField(controller: _loginController,
-            decoration: InputDecoration(
+            TextField(
+              controller: _loginController,
+              decoration: const InputDecoration(
               hintText:"Login",
               border: OutlineInputBorder(),
               labelText: "Login"
@@ -88,14 +89,19 @@ class _MyHomePageState extends State<MyHomePage> {
             TextField(
               controller: _passwordController,
               obscureText: true, // make the password field not show what is typed
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                   hintText:"Password",
                   border: OutlineInputBorder(),
                   labelText: "Password",
-              ),)
+              ),),
 
             // login button
-            ElevatedButton(onPressed: onPressed, child: child),
+            ElevatedButton(
+                onPressed: (){
+                  String password = _passwordController.text; // get the string that was typed in the password field
+                },
+                child: const Text("Login"),
+            ),
 
           ],
 
