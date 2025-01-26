@@ -73,19 +73,27 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
 
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-              // 2. Change both the Text() widgets so that they use a TextStyle() object that are both set to that size.
-              style: TextStyle(fontSize: myFontSize),
-            ),
-            Text(
-              '$_counter',
-              //style: Theme.of(context).textTheme.headlineMedium,
-              // update font size
-              style: TextStyle(fontSize: myFontSize),
-            ),
-            Slider(value:_counter, max:100.0, onChanged: setNewValue, min:0.0 )
+          children: [
+
+            // button 1
+            ElevatedButton(
+                onPressed: () {  },
+                child: Text("Button 1")),
+
+            // button 2
+            ElevatedButton(
+                onPressed: () {  },
+                child: Text("Button 2")),
+
+            // button 3
+            ElevatedButton(
+                onPressed: () {  },
+                child: Text("Button 3")),
+
+            // button 4
+            ElevatedButton(
+                onPressed: () {  },
+                child: Text("Button 4")),
           ],
 
         ),
