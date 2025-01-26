@@ -11,6 +11,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+
+      debugShowCheckedModeBanner: false,      // remove "Debug" banner
+
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -63,16 +66,20 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-
-        title: Text(widget.title),
+          title: Text("ABCDE"),
+          actions: [
+            OutlinedButton(onPressed: () { }, child:Text("Button 1")),
+            OutlinedButton(onPressed: (){ }, child: Text("Button 2"))]
       ),
-      body: Center(
+
+      drawer:Drawer(child:Text("Hi there")),// NavigationDrawer
+
+        body: Center(
 
         child: Column(
 
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
 
             // button 1
@@ -98,6 +105,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
         ),
       ),
+
+      bottomNavigationBar: BottomNavigationBar(items: [
+        BottomNavigationBarItem( icon: Icon(Icons.camera), label: 'Camera' ),
+        BottomNavigationBarItem( icon: Icon(Icons.add_call), label: 'Phone'  ),
+      ],
+        onTap: (buttonIndex) {  } ,
+      ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
