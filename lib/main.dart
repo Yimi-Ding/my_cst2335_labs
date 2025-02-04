@@ -128,8 +128,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-
-
   void setNewValue(double value) {
     setState(() {
       _counter = value;
