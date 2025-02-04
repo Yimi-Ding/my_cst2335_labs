@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -44,6 +45,87 @@ class _MyHomePageState extends State<MyHomePage> {
   // a string variable that is initialized to the image
   var imageSource = "images/question-mark.png";
 
+  // instance of EncryptedSharedPreferences for secure storage
+  final EncryptedSharedPreferences _encryptedPrefs = EncryptedSharedPreferences();
+
+  // Initialize state
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
+
+  // Load saved credentials from encrypted storage
+  Future<void> _loadSavedCredentials() async {
+    final String? savedUsername = await _encryptedPrefs.getString('username');
+    final String? savedPassword = await _encryptedPrefs.getString('password');
+
+    // if there is a saved username and password, save them to the text fields
+    if (savedUsername != null && savedPassword != null) {
+      setState(() {
+        _loginController.text = savedUsername;
+        _passwordController.text = savedPassword;
+      });
+
+      if (mounted) {
+        // Show snackbar with undo option when credentials are loaded
+        final snackBar = SnackBar(
+          content: const Text('Previous login credentials loaded'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () {
+              setState(() {
+                _loginController.clear();
+                _passwordController.clear();
+              });
+            },
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    }
+  }
+
+  // save credentials to encrypted storage
+  Future<void> _saveCredentials() async {
+    await _encryptedPrefs.setString('username', _loginController.text);
+    await _encryptedPrefs.setString('password', _passwordController.text);
+  }
+
+  // clear saved credentials from encrypted storage
+  Future<void> _clearCredentials() async {
+    await _encryptedPrefs.remove('username');
+    await _encryptedPrefs.remove('password');
+  }
+
+  // show dialog for saving credentials
+  Future<void> _showSaveCredentialsDialog() async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Save Credentials'),
+        content: const Text('Would you like to save your username and password for next time?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              _clearCredentials();
+              Navigator.pop(context);
+            },
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () {
+              _saveCredentials();
+              Navigator.pop(context);
+            },
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 
   void setNewValue(double value) {
     setState(() {
@@ -73,9 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-
         child: Column(
-
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
 
@@ -110,6 +190,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       imageSource = "images/stop.png";
                     }
                   });
+                  // show save credentials dialog after login
+                  _showSaveCredentialsDialog();
                 },
                 child: const Text("Login"),
             ),
