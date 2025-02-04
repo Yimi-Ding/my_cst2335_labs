@@ -68,11 +68,12 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       if (mounted) {
-        // Show snackbar with undo option when credentials are loaded
+        // You show a Snackbar if you have reloaded the strings, and the snackbar shows an "Undo" button
         final snackBar = SnackBar(
           content: const Text('Previous login credentials loaded'),
           action: SnackBarAction(
             label: 'Undo',
+            // If you click the Undo button, the reloaded strings are cleared but not removed from EncryptedSharedPreferences.
             onPressed: () {
               setState(() {
                 _loginController.clear();
@@ -86,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  // save credentials to encrypted storage
+  // If you save the strings, then the next time you start your application, the strings are loaded into the TextFields
   Future<void> _saveCredentials() async {
     await _encryptedPrefs.setString('username', _loginController.text);
     await _encryptedPrefs.setString('password', _passwordController.text);
@@ -103,10 +104,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
+        // show an AlertDialog asking to save the login name and password.
         title: const Text('Save Credentials'),
         content: const Text('Would you like to save your username and password for next time?'),
         actions: <Widget>[
           TextButton(
+            // CLicking on the buttons of the dialog will either save or not save the strings.
             onPressed: () {
               _clearCredentials();
               Navigator.pop(context);
