@@ -75,71 +75,84 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       body: Center(
         child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Welcome Back, ${DataRepository.username}!",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Welcome Back, ${DataRepository.username}!",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: _firstNameController,
+                decoration: InputDecoration(
+                  labelText: 'First Name',
+                  border: OutlineInputBorder(),
                 ),
-                SizedBox(height: 16),
-                TextField(
-                  controller: _firstNameController,
-                  decoration: InputDecoration(
-                    labelText: 'First Name',
-                    border: OutlineInputBorder(),
-                  ),
+                onChanged: (value) {
+                  saveUserData();
+                },
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: _lastNameController,
+                decoration: InputDecoration(
+                  labelText: 'Last Name',
+                  border: OutlineInputBorder(),
                 ),
-                SizedBox(height: 16),
-                TextField(
-                  controller: _lastNameController,
-                  decoration: InputDecoration(
-                    labelText: 'Last Name',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                SizedBox(height: 16),
-                Row(
-                  children: [
-                    Flexible(
-                      child: TextField(
-                        controller: _phoneController,
-                        decoration: InputDecoration(
-                          labelText: 'Phone Number',
-                          border: OutlineInputBorder(),
-                        ),
+                onChanged: (value) {
+                  saveUserData();
+                },
+              ),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Flexible(
+                    child: TextField(
+                      controller: _phoneController,
+                      decoration: InputDecoration(
+                        labelText: 'Phone Number',
+                        border: OutlineInputBorder(),
                       ),
+                      onChanged: (value) {
+                        saveUserData();
+                      },
                     ),
-                    IconButton(
-                      icon: Icon(Icons.phone),
-                      onPressed: () => _launchURL('tel:${_phoneController.text}'),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.message),
-                      onPressed: () => _launchURL('sms:${_phoneController.text}'),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                Row(
-                  children: [
-                    Flexible(
-                      child: TextField(
-                        controller: _emailController,
-                        decoration: InputDecoration(
-                          labelText: 'Email Address',
-                          border: OutlineInputBorder(),
-                        ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.phone),
+                    onPressed: () => _launchURL('tel:${_phoneController.text}'),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.message),
+                    onPressed: () => _launchURL('sms:${_phoneController.text}'),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Flexible(
+                    child: TextField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelText: 'Email Address',
+                        border: OutlineInputBorder(),
                       ),
+                      onChanged: (value) {
+                        saveUserData();
+                      },
                     ),
-                    IconButton(
-                      icon: Icon(Icons.mail),
-                      onPressed: () => _launchURL('mailto:${_emailController.text}'),
-                    ),
-                  ],
-                ),
-              ],)
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.mail),
+                    onPressed: () => _launchURL('mailto:${_emailController.text}'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
