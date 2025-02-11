@@ -8,10 +8,10 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late TextEditingController _firstNameController = TextEditingController();
-  late TextEditingController _lastNameController = TextEditingController();
-  late TextEditingController _phoneController = TextEditingController();
-  late TextEditingController _emailController = TextEditingController();
+  late final TextEditingController _firstNameController = TextEditingController();
+  late final TextEditingController _lastNameController = TextEditingController();
+  late final TextEditingController _phoneController = TextEditingController();
+  late final TextEditingController _emailController = TextEditingController();
 
   @override
   void initState() {
@@ -31,8 +31,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
     super.dispose();
-    saveUserData();
   }
 
   Future<void> saveUserData() async {
@@ -43,9 +46,10 @@ class _ProfilePageState extends State<ProfilePage> {
     await DataRepository.saveData();
   }
 
-  Future<void> _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
     } else {
       showDialog(
         context: context,
@@ -70,70 +74,72 @@ class _ProfilePageState extends State<ProfilePage> {
         title: Text('Profile Page'),
       ),
       body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Welcome Back, ${DataRepository.username}!",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _firstNameController,
-              decoration: InputDecoration(
-                labelText: 'First Name',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _lastNameController,
-              decoration: InputDecoration(
-                labelText: 'Last Name',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
-            Row(
+        child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flexible(
-                  child: TextField(
-                    controller: _phoneController,
-                    decoration: InputDecoration(
-                      labelText: 'Phone Number',
-                      border: OutlineInputBorder(),
-                    ),
+                Text(
+                  "Welcome Back, ${DataRepository.username}!",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 16),
+                TextField(
+                  controller: _firstNameController,
+                  decoration: InputDecoration(
+                    labelText: 'First Name',
+                    border: OutlineInputBorder(),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.phone),
-                  onPressed: () => _launchURL('tel:${_phoneController.text}'),
-                ),
-                IconButton(
-                  icon: Icon(Icons.message),
-                  onPressed: () => _launchURL('sms:${_phoneController.text}'),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            Row(
-              children: [
-                Flexible(
-                  child: TextField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Email Address',
-                      border: OutlineInputBorder(),
-                    ),
+                SizedBox(height: 16),
+                TextField(
+                  controller: _lastNameController,
+                  decoration: InputDecoration(
+                    labelText: 'Last Name',
+                    border: OutlineInputBorder(),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.mail),
-                  onPressed: () => _launchURL('mailto:${_emailController.text}'),
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    Flexible(
+                      child: TextField(
+                        controller: _phoneController,
+                        decoration: InputDecoration(
+                          labelText: 'Phone Number',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.phone),
+                      onPressed: () => _launchURL('tel:${_phoneController.text}'),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.message),
+                      onPressed: () => _launchURL('sms:${_phoneController.text}'),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    Flexible(
+                      child: TextField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email Address',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.mail),
+                      onPressed: () => _launchURL('mailto:${_emailController.text}'),
+                    ),
+                  ],
+                ),
+              ],)
         ),
       ),
     );

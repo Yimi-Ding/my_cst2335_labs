@@ -130,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if(_loginController.text == "yimi" && _passwordController.text =="123456"){
       DataRepository.username = _loginController.text;
       DataRepository.password = _passwordController.text;
-      DataRepository.saveData();  // Save login data
+      DataRepository.saveData(); // save data
 
       Navigator.pushNamed(context,'/second');
 
@@ -176,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 showSaveDataDialog(context);
 
                 String password = _passwordController.text;
-                if (password == "QWERTY123"){
+                if (password == "123456"){
                   setState(() {
                     imageSource = 'images/idea.png';
                   });
