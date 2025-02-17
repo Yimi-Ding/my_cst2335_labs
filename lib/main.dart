@@ -7,127 +7,158 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Shopping List',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-
 class _MyHomePageState extends State<MyHomePage> {
+  final List<ShoppingItem> items = [];
+  final TextEditingController _itemController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
 
-  var _counter = 0.0;
-  var myFontSize = 30.0;
-
-  // Controllers for the text fields
-  final TextEditingController  _loginController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  // a string variable that is initialized to the image
-  var imageSource = "images/question-mark.png";
-
-
-  void setNewValue(double value) {
-    setState(() {
-      _counter = value;
-      myFontSize = value;
-    });
+  @override
+  void dispose() {
+    _itemController.dispose();
+    _quantityController.dispose();
+    super.dispose();
   }
 
-
-  void _incrementCounter() {
-    setState(() {
-      if ( _counter < 99.0 ) { //add missing brackets
-        _counter++;
-        myFontSize = _counter;
-      }
-    });
+  Widget ListPage() {
+    return Column(
+      children: [
+        // Input row with text fields and add button
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: _itemController,
+                  decoration: const InputDecoration(
+                    labelText: 'Item Name',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _quantityController,
+                  decoration: const InputDecoration(
+                    labelText: 'Quantity',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  if (_itemController.text.isNotEmpty &&
+                      _quantityController.text.isNotEmpty) {
+                    setState(() {
+                      items.add(ShoppingItem(
+                        _itemController.text,
+                        int.tryParse(_quantityController.text) ?? 1,
+                      ));
+                      _itemController.clear();
+                      _quantityController.clear();
+                    });
+                  }
+                },
+                child: const Text('Add'),
+              ),
+            ],
+          ),
+        ),
+        // List view of items
+        Expanded(
+          child: items.isEmpty
+              ? const Center(
+            child: Text('There are no items in the list'),
+          )
+              : ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onLongPress: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Delete Item'),
+                        content: const Text('Do you want to delete this item?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('No'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                items.removeAt(index);
+                              });
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Yes'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('${index + 1}. ${items[index].name}'),
+                        Text('Quantity: ${items[index].quantity}'),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 
-  //widgets
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-
-        title: Text(widget.title),
+        title: const Text('Shopping List'),
       ),
-      body: Center(
-
-        child: Column(
-
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-
-            // text field login
-            TextField(
-              controller: _loginController,
-              decoration: const InputDecoration(
-              hintText:"Login",
-              border: OutlineInputBorder(),
-              labelText: "Login"
-            ),),
-
-            // text field password
-            TextField(
-              controller: _passwordController,
-              obscureText: true, // make the password field not show what is typed
-              decoration: const InputDecoration(
-                  hintText:"Password",
-                  border: OutlineInputBorder(),
-                  labelText: "Password",
-              ),),
-
-            // login button
-            ElevatedButton(
-                onPressed: (){
-                  String password = _passwordController.text; // get the string that was typed in the password field
-                  setState(() {
-                    //  If the string is "QWERTY123", then change the image source to be a light bulb
-                    if (password == "QWERTY123"){
-                      imageSource = "images/idea.png";
-                    } else { //If the string is anything other than "QWERTY123", then set the image to a stop sign
-                      imageSource = "images/stop.png";
-                    }
-                  });
-                },
-                child: const Text("Login"),
-            ),
-
-            Image.asset(imageSource, width: 300, height:300),
-
-
-          ],
-
-
-
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: ListPage(),
     );
   }
+}
+
+class ShoppingItem {
+  final String name;
+  final int quantity;
+
+  ShoppingItem(this.name, this.quantity);
 }
