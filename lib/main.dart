@@ -11,9 +11,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Shopping List',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
       home: const MyHomePage(),
     );
   }
@@ -41,7 +38,6 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget ListPage() {
     return Column(
       children: [
-        // Input row with text fields and add button
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -51,17 +47,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: TextField(
                   controller: _itemController,
                   decoration: const InputDecoration(
-                    labelText: 'Item Name',
+                    hintText: 'Type the item here',
                     border: OutlineInputBorder(),
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
+                flex: 2,
                 child: TextField(
                   controller: _quantityController,
                   decoration: const InputDecoration(
-                    labelText: 'Quantity',
+                    hintText: 'Type the quantity here',
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
@@ -87,7 +84,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
-        // List view of items
         Expanded(
           child: items.isEmpty
               ? const Center(
@@ -125,16 +121,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                   );
                 },
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('${index + 1}. ${items[index].name}'),
-                        Text('Quantity: ${items[index].quantity}'),
-                      ],
-                    ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Text(
+                    '${index + 1}: ${items[index].name} quantity: ${items[index].quantity}',
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ),
               );
