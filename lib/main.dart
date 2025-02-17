@@ -24,10 +24,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<ShoppingItem> items = [];
+  final List<ShoppingItem> items = [];   // List用于存储购物清单项目
+  // TextEditingController 用于控制和管理TextField的输入
   final TextEditingController _itemController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
 
+  // dispose方法在widget被销毁时调用
   @override
   void dispose() {
     _itemController.dispose();
@@ -35,13 +37,17 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+  // 创建一个函数来返回列表页面的Widget
   Widget ListPage() {
     return Column(
       children: [
+        // 输入部分：包含两个TextField和一个按钮
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
+              // Expanded widget让子widget填充可用空间
+              // flex参数决定占据空间的比例
               Expanded(
                 flex: 2,
                 child: TextField(
@@ -67,6 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
               const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () {
+                  // 验证输入不为空
                   if (_itemController.text.isNotEmpty &&
                       _quantityController.text.isNotEmpty) {
                     setState(() {
@@ -74,6 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         _itemController.text,
                         int.tryParse(_quantityController.text) ?? 1,
                       ));
+                      // 清空输入框
                       _itemController.clear();
                       _quantityController.clear();
                     });
@@ -84,6 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
+        // ListView部分
         Expanded(
           child: items.isEmpty
               ? const Center(
