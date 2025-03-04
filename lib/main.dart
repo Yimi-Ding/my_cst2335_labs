@@ -38,7 +38,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<TodoItem> items = [];
+  List<TodoItem> items = [];   // List用于存储购物清单项目
+  // TextEditingController 用于控制和管理TextField的输入
   final TextEditingController _itemController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
 
@@ -53,9 +54,14 @@ class _MyHomePageState extends State<MyHomePage> {
     final loadedItems = await widget.database.todoDao.findAllTodoItems();
     setState(() {
       items = loadedItems;
+      // Update ID counter if needed
+      if (items.isNotEmpty) {
+        TodoItem.ID = items.map((item) => item.id).reduce((a, b) => a > b ? a : b) + 1;
+      }
     });
   }
 
+  // dispose方法在widget被销毁时调用
   @override
   void dispose() {
     _itemController.dispose();
@@ -63,15 +69,17 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  // Create a function to return the list page Widget
+  // 创建一个函数来返回列表页面的Widget
   Widget ListPage() {
     return Column(
       children: [
-        // Input section: contains two TextFields and a button
+        // 输入部分：包含两个TextField和一个按钮
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
+              // Expanded widget让子widget填充可用空间
+              // flex参数决定占据空间的比例
               Expanded(
                 flex: 2,
                 child: TextField(
@@ -97,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
               const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () {
-                  // Validate inputs not empty
+                  // 验证输入不为空
                   if (_itemController.text.isNotEmpty &&
                       _quantityController.text.isNotEmpty) {
 
@@ -114,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     setState(() {
                       // Add to local list
                       items.add(newItem);
-                      // Clear input fields
+                      // 清空输入框
                       _itemController.clear();
                       _quantityController.clear();
                     });
@@ -125,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
-        // ListView part
+        // ListView部分
         Expanded(
           child: items.isEmpty
               ? const Center(

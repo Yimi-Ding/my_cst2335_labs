@@ -4,13 +4,13 @@ import 'todo_item.dart';
 @dao
 abstract class TodoDao {
 
-  @Query("Select * from TodoItem")
-  Future<List<TodoItem>> getAllTodos();
+  @Query('SELECT * FROM TodoItem')
+  Future<List<TodoItem>> findAllTodoItems();
 
   @insert
-  Future<void> insertItem(TodoItem item);
+  Future<void> insertTodoItem(TodoItem item);
 
   @delete
-  Future<void> deleteItem(TodoItem item);
+  Future<void> deleteTodoItem(TodoItem item);
 
 }

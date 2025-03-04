@@ -1,15 +1,17 @@
 import 'package:floor/floor.dart';
 
 @entity
-class TodoItem{
+class TodoItem {
   static int ID = 1;
 
   @primaryKey
   final int id;
-  final String todoItem;
 
-  TodoItem(this.id, this.todoItem){
-    if (id > ID ){
+  final String name;
+  final int quantity;
+
+  TodoItem(this.id, this.name, this.quantity) {
+    if (id >= ID) {
       ID = id + 1;
     }
   }
