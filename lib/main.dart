@@ -1,133 +1,203 @@
+//author: yimi ding
+// date: 3/4/2025
 import 'package:flutter/material.dart';
+import 'database.dart';
+import 'todo_item.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  // Initialize Flutter binding
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize the database
+  final database = await $FloorAppDatabase
+      .databaseBuilder('shopping_list.db')
+      .build();
+
+  runApp(MyApp(database: database));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AppDatabase database;
 
-  // This widget is the root of your application.
+  const MyApp({super.key, required this.database});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'Shopping List',
+      home: MyHomePage(database: database),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  final AppDatabase database;
 
-
-  final String title;
+  const MyHomePage({super.key, required this.database});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-
 class _MyHomePageState extends State<MyHomePage> {
+  List<TodoItem> items = [];   // List用于存储购物清单项目
+  // TextEditingController 用于控制和管理TextField的输入
+  final TextEditingController _itemController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
 
-  var _counter = 0.0;
-  var myFontSize = 30.0;
-
-  // Controllers for the text fields
-  final TextEditingController  _loginController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  // a string variable that is initialized to the image
-  var imageSource = "images/question-mark.png";
-
-
-  void setNewValue(double value) {
-    setState(() {
-      _counter = value;
-      myFontSize = value;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _loadItems(); // Load items from database when app starts (Requirement 2)
   }
 
-
-  void _incrementCounter() {
+  // Load items from database
+  Future<void> _loadItems() async {
+    final loadedItems = await widget.database.todoDao.findAllTodoItems();
     setState(() {
-      if ( _counter < 99.0 ) { //add missing brackets
-        _counter++;
-        myFontSize = _counter;
+      items = loadedItems;
+      // Update ID counter if needed
+      if (items.isNotEmpty) {
+        TodoItem.ID = items.map((item) => item.id).reduce((a, b) => a > b ? a : b) + 1;
       }
     });
   }
 
-  //widgets
+  // dispose方法在widget被销毁时调用
+  @override
+  void dispose() {
+    _itemController.dispose();
+    _quantityController.dispose();
+    super.dispose();
+  }
+
+  // 创建一个函数来返回列表页面的Widget
+  Widget ListPage() {
+    return Column(
+      children: [
+        // 输入部分：包含两个TextField和一个按钮
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              // Expanded widget让子widget填充可用空间
+              // flex参数决定占据空间的比例
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: _itemController,
+                  decoration: const InputDecoration(
+                    hintText: 'Type the item here',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: _quantityController,
+                  decoration: const InputDecoration(
+                    hintText: 'Type the quantity here',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  // 验证输入不为空
+                  if (_itemController.text.isNotEmpty &&
+                      _quantityController.text.isNotEmpty) {
+
+                    // Create new item
+                    final newItem = TodoItem(
+                      TodoItem.ID,
+                      _itemController.text,
+                      int.tryParse(_quantityController.text) ?? 1,
+                    );
+
+                    // Insert into database (Requirement 1)
+                    widget.database.todoDao.insertTodoItem(newItem);
+
+                    setState(() {
+                      // Add to local list
+                      items.add(newItem);
+                      // 清空输入框
+                      _itemController.clear();
+                      _quantityController.clear();
+                    });
+                  }
+                },
+                child: const Text('Add'),
+              ),
+            ],
+          ),
+        ),
+        // ListView部分
+        Expanded(
+          child: items.isEmpty
+              ? const Center(
+            child: Text('There are no items in the list'),
+          )
+              : ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onLongPress: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Delete Item'),
+                        content: const Text('Do you want to delete this item?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('No'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              // Delete from database (Requirement 3)
+                              widget.database.todoDao.deleteTodoItem(items[index]);
+
+                              setState(() {
+                                items.removeAt(index);
+                              });
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Yes'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Text(
+                    '${index + 1}: ${items[index].name} quantity: ${items[index].quantity}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-
-        title: Text(widget.title),
+        title: const Text('Shopping List'),
       ),
-      body: Center(
-
-        child: Column(
-
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-
-            // text field login
-            TextField(
-              controller: _loginController,
-              decoration: const InputDecoration(
-              hintText:"Login",
-              border: OutlineInputBorder(),
-              labelText: "Login"
-            ),),
-
-            // text field password
-            TextField(
-              controller: _passwordController,
-              obscureText: true, // make the password field not show what is typed
-              decoration: const InputDecoration(
-                  hintText:"Password",
-                  border: OutlineInputBorder(),
-                  labelText: "Password",
-              ),),
-
-            // login button
-            ElevatedButton(
-                onPressed: (){
-                  String password = _passwordController.text; // get the string that was typed in the password field
-                  setState(() {
-                    //  If the string is "QWERTY123", then change the image source to be a light bulb
-                    if (password == "QWERTY123"){
-                      imageSource = "images/idea.png";
-                    } else { //If the string is anything other than "QWERTY123", then set the image to a stop sign
-                      imageSource = "images/stop.png";
-                    }
-                  });
-                },
-                child: const Text("Login"),
-            ),
-
-            Image.asset(imageSource, width: 300, height:300),
-
-
-          ],
-
-
-
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: ListPage(),
     );
   }
 }
