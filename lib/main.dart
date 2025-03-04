@@ -1,164 +1,110 @@
 import 'package:flutter/material.dart';
+import 'database.dart';
+import 'todo_item.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final database = await $FloorAppDatabase.databaseBuilder('app_database.db').build();
+  runApp(MyApp(database: database));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AppDatabase database;
+
+  const MyApp({super.key, required this.database});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Shopping List',
-      home: const MyHomePage(),
+      title: 'Todo App',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: TodoListScreen(database: database),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class TodoListScreen extends StatefulWidget {
+  final AppDatabase database;
+
+  const TodoListScreen({super.key, required this.database});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<TodoListScreen> createState() => _TodoListScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  final List<ShoppingItem> items = [];   // List用于存储购物清单项目
-  // TextEditingController 用于控制和管理TextField的输入
-  final TextEditingController _itemController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController();
+class _TodoListScreenState extends State<TodoListScreen> {
+  List<TodoItem> todos = [];
+  final TextEditingController _controller = TextEditingController();
 
-  // dispose方法在widget被销毁时调用
   @override
-  void dispose() {
-    _itemController.dispose();
-    _quantityController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _loadTodos();
   }
 
-  // 创建一个函数来返回列表页面的Widget
-  Widget ListPage() {
-    return Column(
-      children: [
-        // 输入部分：包含两个TextField和一个按钮
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              // Expanded widget让子widget填充可用空间
-              // flex参数决定占据空间的比例
-              Expanded(
-                flex: 2,
-                child: TextField(
-                  controller: _itemController,
-                  decoration: const InputDecoration(
-                    hintText: 'Type the item here',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 2,
-                child: TextField(
-                  controller: _quantityController,
-                  decoration: const InputDecoration(
-                    hintText: 'Type the quantity here',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  // 验证输入不为空
-                  if (_itemController.text.isNotEmpty &&
-                      _quantityController.text.isNotEmpty) {
-                    setState(() {
-                      items.add(ShoppingItem(
-                        _itemController.text,
-                        int.tryParse(_quantityController.text) ?? 1,
-                      ));
-                      // 清空输入框
-                      _itemController.clear();
-                      _quantityController.clear();
-                    });
-                  }
-                },
-                child: const Text('Add'),
-              ),
-            ],
-          ),
-        ),
-        // ListView部分
-        Expanded(
-          child: items.isEmpty
-              ? const Center(
-            child: Text('There are no items in the list'),
-          )
-              : ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onLongPress: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Delete Item'),
-                        content: const Text('Do you want to delete this item?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('No'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                items.removeAt(index);
-                              });
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Yes'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Text(
-                    '${index + 1}: ${items[index].name} quantity: ${items[index].quantity}',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
+  Future<void> _loadTodos() async {
+    final todoDao = widget.database.todoDao;
+    final todoList = await todoDao.getAllTodos();
+    setState(() {
+      todos = todoList;
+    });
+  }
+
+  Future<void> _addTodo(String text) async {
+    if (text.isNotEmpty) {
+      final todo = TodoItem(TodoItem.ID, text);
+      await widget.database.todoDao.insertItem(todo);
+      _controller.clear();
+      _loadTodos();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Shopping List'),
+      appBar: AppBar(title: Text('Todo List')),
+      body: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      hintText: 'Enter todo item',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () => _addTodo(_controller.text),
+                  child: Text('Add'),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: todos.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(todos[index].todoItem),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () async {
+                      await widget.database.todoDao.deleteItem(todos[index]);
+                      _loadTodos();
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
-      body: ListPage(),
     );
   }
-}
-
-class ShoppingItem {
-  final String name;
-  final int quantity;
-
-  ShoppingItem(this.name, this.quantity);
 }

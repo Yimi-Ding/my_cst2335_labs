@@ -10,6 +10,9 @@ abstract class TodoDao {
   @insert
   Future<void> insertItem(TodoItem item);
 
+  @update
+  Future<void> updateTodo(TodoItem todo);
+
   @delete
   Future<void> deleteItem(TodoItem item);
 
