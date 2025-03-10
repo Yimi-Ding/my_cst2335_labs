@@ -1,5 +1,5 @@
 //author: yimi ding
-// date: 3/4/2025
+// date: 3/10/2025
 import 'package:flutter/material.dart';
 import 'database.dart';
 import 'todo_item.dart';
@@ -44,11 +44,12 @@ class _MyHomePageState extends State<MyHomePage> {
   // TextEditingController 用于控制和管理TextField的输入
   final TextEditingController _itemController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
+  TodoItem? selectedItem = null; // 用于存储用户选择的项目
 
   @override
   void initState() {
     super.initState();
-    _loadItems(); // Load items from database when app starts (Requirement 2)
+    _loadItems(); // Load items from database when app starts
   }
 
   // Load items from database
@@ -118,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       int.tryParse(_quantityController.text) ?? 1,
                     );
 
-                    // Insert into database (Requirement 1)
+                    // Insert into database
                     widget.database.todoDao.insertTodoItem(newItem);
 
                     setState(() {
@@ -145,36 +146,12 @@ class _MyHomePageState extends State<MyHomePage> {
             itemCount: items.length,
             itemBuilder: (context, index) {
               return GestureDetector(
-                onLongPress: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Delete Item'),
-                        content: const Text('Do you want to delete this item?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('No'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              // Delete from database (Requirement 3)
-                              widget.database.todoDao.deleteTodoItem(items[index]);
-
-                              setState(() {
-                                items.removeAt(index);
-                              });
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Yes'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
+                // 修改长按为点击事件
+                onTap: () {
+                  setState(() {
+                    // 设置选中的项目
+                    selectedItem = items[index];
+                  });
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -191,13 +168,102 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  // 创建详情页面Widget
+  Widget DetailsPage() {
+    if (selectedItem != null) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Item Details',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Text('Name: ${selectedItem!.name}', style: TextStyle(fontSize: 18)),
+            SizedBox(height: 10),
+            Text('Quantity: ${selectedItem!.quantity}', style: TextStyle(fontSize: 18)),
+            SizedBox(height: 10),
+            Text('Database ID: ${selectedItem!.id}', style: TextStyle(fontSize: 18)),
+            SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // 删除选中的项目
+                    widget.database.todoDao.deleteTodoItem(selectedItem!);
+                    setState(() {
+                      items.removeWhere((item) => item.id == selectedItem!.id);
+                      selectedItem = null; // 清除选中项
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
+                  child: Text('Delete'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // 关闭详情页面
+                    setState(() {
+                      selectedItem = null;
+                    });
+                  },
+                  child: Text('Close'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Center(
+        child: Text('No item selected'),
+      );
+    }
+  }
+
+  // 响应式布局函数
+  Widget reactiveLayout() {
+    // 获取屏幕尺寸
+    var size = MediaQuery.of(context).size;
+    var height = size.height;
+    var width = size.width;
+
+    // 判断是否为平板布局（横屏且宽度>720像素）
+    if ((width > height) && (width > 720)) {
+      // 平板布局：左侧列表，右侧详情
+      return Row(
+        children: [
+          Expanded(
+            flex: 2, // 列表占据2/5的宽度
+            child: ListPage(),
+          ),
+          Expanded(
+            flex: 3, // 详情占据3/5的宽度
+            child: DetailsPage(),
+          ),
+        ],
+      );
+    } else {
+      // 手机布局：如果有选中项目则显示详情，否则显示列表
+      if (selectedItem == null) {
+        return ListPage();
+      } else {
+        return DetailsPage();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shopping List'),
       ),
-      body: ListPage(),
+      body: reactiveLayout(), // 使用响应式布局
     );
   }
 }
